@@ -177,6 +177,11 @@ impl<A: Actionlike> InputMap<A> {
         clash_strategy: ClashStrategy,
         gamepad: Entity,
     ) {
+        // PressAll never culls an action. Skip `possible_clashes`, which is
+        // rebuilt (not cached) on every call: O(actions²) binding decompositions.
+        if clash_strategy == ClashStrategy::PressAll {
+            return;
+        }
         for clash in self.get_clashes(updated_actions, input_store, gamepad) {
             // Remove the action in the pair that was overruled, if any
             if let Some(culled_action) = resolve_clash(&clash, clash_strategy, input_store, gamepad)
